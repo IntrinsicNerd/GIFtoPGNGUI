@@ -12,19 +12,7 @@ namespace WinFormsApp1
     {
         public ChessBoard Game;
         public static bool whitebottom = true;
-        public static Random lolxd = new Random();
-        public Bitmap BitmapFromSource(BitmapSource bitmapsource)
-        {
-            Bitmap bitmap;
-            using (MemoryStream outStream = new MemoryStream())
-            {
-                BitmapEncoder enc = new BmpBitmapEncoder();
-                enc.Frames.Add(BitmapFrame.Create(bitmapsource));
-                enc.Save(outStream);
-                bitmap = new Bitmap(outStream);
-            }
-            return bitmap;
-        }
+        int lr, lg, lb, dr, dg, db;
         List<square> board = new List<square>();
         bool colorChange = false;
         public Form1()
@@ -34,8 +22,7 @@ namespace WinFormsApp1
 
         }
         public List<Bitmap> images;
-        Bitmap squarebm;
-        #region code I'm copying
+       
         public class AnimatedGif
         {
             private List<AnimatedGifFrame> mImages = new List<AnimatedGifFrame>();
@@ -222,7 +209,7 @@ namespace WinFormsApp1
 
         List<Color> wte = new List<Color>();
         List<Color> blk = new List<Color>();
-        #endregion
+        
         private void button1_Click(object sender, EventArgs e)
         {
             PictureAnalysis pic = new PictureAnalysis();
@@ -235,91 +222,82 @@ namespace WinFormsApp1
             Color dsquareghost = new Color();
             if (of.ShowDialog() == DialogResult.OK)
             {
-                lsquareghost = Color.FromArgb(255, (int)LSR.Value,(int) LSG.Value, (int)LSB.Value);
-                dsquareghost = Color.FromArgb(255, (int)RSR.Value, (int)RSG.Value, (int)RSB.Value);
-
-                Game = new ChessBoard();
-                timer1.Start();
-                comboBox1.Items.Clear();
-                board.Clear();
-                int[] ranks = { 1, 2, 3, 4, 5, 6, 7, 8 };
-                if (!whitebottom)
-                    ranks = ranks.Reverse().ToArray();
-                char[] f = (whitebottom ? new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' } : new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' }.Reverse().ToArray());
-                for (int i = 1; i < 9; i++)
+                if (!of.FileName.EndsWith(".gif", StringComparison.CurrentCultureIgnoreCase))
                 {
-                    int sx = pictureBox1.Width / 8;
-                    int sy = pictureBox1.Height / 8;
-                    for (int k = 0; k < 8; k++)
-                    {
-                        byte v = (byte)((((i + (k + 1)) % 2 == 0)) ? 1 : 0);
-                        board.Add(
-                            new square(sy / 4, sx / 6,
-                            ranks[i - 1], f[k],
-                            new int[] { (k * sy) + sy / 2, ((8 - i) * sx) + sx / 2 },
-                            (i > 2 && i < 7) ? true : false, v));
-                        //full squares
-                        //board.Add(
-                        //    new square(sy, sx,
-                        //    ranks[i - 1], f[k],
-                        //    new int[] { (k * sy), ((8 - i) * sx) },
-                        //    (i > 2 && i < 7) ? true : false, v));
-                    }
+                    MessageBox.Show("File must be a gif!", "Error: File type mismatch");
+                }
+                else
+                {
+                    
+                    lsquareghost = Color.FromArgb(255, !hex?(int)LSR.Value:lr, !hex?(int)LSG.Value:lg, !hex?(int)LSB.Value:lb);
+                    dsquareghost = Color.FromArgb(255, !hex?(int)RSR.Value:dr, !hex?(int)RSG.Value:dg, !hex?(int)RSB.Value:db);
 
-                    comboBox1.Items.Clear();
+                    Game = new ChessBoard();
+
+
+                    board.Clear();
+                    int[] ranks = { 1, 2, 3, 4, 5, 6, 7, 8 };
+                    if (!whitebottom)
+                        ranks = ranks.Reverse().ToArray();
+                    char[] f = (whitebottom ? new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' } : new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' }.Reverse().ToArray());
+                    for (int i = 1; i < 9; i++)
+                    {
+                        int sx = (int)sizeud.Value / 8;
+                        int sy = (int)sizeud.Value / 8;
+                        for (int k = 0; k < 8; k++)
+                        {
+                            byte v = (byte)((((i + (k + 1)) % 2 == 0)) ? 1 : 0);
+                            board.Add(
+                                new square(sy / 4, sx / 6,
+                                ranks[i - 1], f[k],
+                                new int[] { (k * sy) + sy / 2, ((8 - i) * sx) + sx / 2 },
+                                (i > 2 && i < 7) ? true : false, v));
+                            //full squares
+                            //board.Add(
+                            //    new square(sy, sx,
+                            //    ranks[i - 1], f[k],
+                            //    new int[] { (k * sy), ((8 - i) * sx) },
+                            //    (i > 2 && i < 7) ? true : false, v));
+                        }
+
+
+
+                    }
+                    string fl = of.FileName;
+                    images = new List<Bitmap>();
+                    AnimatedGif gif = new AnimatedGif(fl, images);
+
                     foreach (square s in board)
                     {
-                        comboBox1.Items.Add(s.name);
+                        if (s.name == "e1")
+                        {
+
+                            wte = PictureAnalysis.GetMostUsedColorList(images[0].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0), 3);
+                        }
+                        if (s.name == "e8")
+                        {
+                            blk = PictureAnalysis.GetMostUsedColorList(images[0].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0), 3);
+                        }
+                        if (s.name == "e5")
+                        {
+                            dsquare = PictureAnalysis.GetMostUsedColor(images[0].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0));
+                        }
+                        if (s.name == "d5")
+                        {
+                            lsquare = PictureAnalysis.GetMostUsedColor(images[0].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0));
+                        }
                     }
-                }
-                string fl = of.FileName;
-                //Stream imageStreamSource = new FileStream(fl, FileMode.Open, FileAccess.Read, FileShare.Read);
-                //GifBitmapDecoder dec = new GifBitmapDecoder(imageStreamSource, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
-                images = new List<Bitmap>();
-                AnimatedGif gif = new AnimatedGif(of.FileName, images);
-                //foreach (BitmapSource b in dec.Frames)
-                //{
-                //    int fc = 0;
-
-                //    images.Add(new Bitmap(BitmapFromSource(b), new Size(400, 400)));
-                //}
-                foreach (square s in board)
-                {
-                    if (s.name == "e1")
-                    {
-                        // wte = images[0].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0).GetPixel((s.width / 2) - 5, (s.height * 2) / 4);
-
-                        wte = PictureAnalysis.GetMostUsedColorList(images[0].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0), 3);
-                    }
-                    if (s.name == "e8")
-                    {
-                        blk = PictureAnalysis.GetMostUsedColorList(images[0].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0), 3);
-                        //blk = images[0].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0).GetPixel((s.width / 2) - 5, (s.height * 2) / 4);
-                    }
-                    if (s.name == "e5" )
-                    {
-                        dsquare = PictureAnalysis.GetMostUsedColor(images[0].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0));
-                    }
-                    if (s.name == "d5" )
-                    {
-                        lsquare = PictureAnalysis.GetMostUsedColor(images[0].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0));
-                    }
-                }
 
 
-                pictureBox1.Image = images[0];
-                square rand = board[lolxd.Next(board.Count)];
-                label1.Text = rand.name + ", " + (rand.color == 0 ? "White" : "Black");
-                squarebm = images[0].Clone(new RectangleF(new PointF(rand.topleft[0], rand.topleft[1]), new SizeF(rand.width, rand.height)), 0);
-                pictureBox2.Image = squarebm;
 
 
-                //implement timer code so that the color changes
-                //whiteBox.BackColor = wte;
-                //blackBox.BackColor = blk;
-                if (chk)
+
+
+
+
+
                     readGame(images);
-                List<Bitmap> LastTurn = new List<Bitmap>();
+                }
 
             }
             void readGame(List<Bitmap> ims)
@@ -336,7 +314,7 @@ namespace WinFormsApp1
                     string dest = "";
                     count++;
                     Color most = new Color();
-                    pictureBox1.Image = ims[num];
+
                     if (t1)
                     {
                         //here will be more complex code comparing for turn one specific stuff
@@ -345,10 +323,10 @@ namespace WinFormsApp1
 
                             if (s.rank == 2)
                             {
-                               
+
                                 Bitmap cur = b.Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0);
                                 most = PictureAnalysis.GetMostUsedColor(cur);
-                                s.cur_empty = tolCheck(most, 5, !colorChange?lsquare:lsquareghost) || tolCheck(most, 5, !colorChange?dsquare:dsquareghost);
+                                s.cur_empty = tolCheck(most, 5, !colorChange ? lsquare : lsquareghost) || tolCheck(most, 5, !colorChange ? dsquare : dsquareghost);
 
                                 if (s.cur_empty)
                                 {
@@ -391,8 +369,7 @@ namespace WinFormsApp1
                                             goto EndT1;
                                         }
                                     }
-                                    pictureBox3.Image = three;
-                                    pictureBox2.Image = cur;
+
 
                                 }
                             }
@@ -414,27 +391,27 @@ namespace WinFormsApp1
                         foreach (square s in board)
                         {
 
-                            
+
                             if (s.cur_empty)
                                 s.was_empty = true;
                             else s.was_empty = false;
-                          
+
                             Bitmap cur = b.Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0);
                             Bitmap prev = ims[ims.IndexOf(b) - 1].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0);
 
                             Color curcol = PictureAnalysis.GetMostUsedColor(cur);
                             Color prevcol = PictureAnalysis.GetMostUsedColor(prev);
-                            if ((s.name == "e5" || s.name == "d6") && count ==5)
+                            if ((s.name == "e5" || s.name == "d6") && count == 5)
                             {
                                 st = Game.ToAscii();
                             }
-                            if (!tolCheck(curcol, 10, prevcol) )
+                            if (!tolCheck(curcol, 10, prevcol))
                             {
                                 // pictureBox2.Image = cur;
                                 //pictureBox3.Image = prev;
                                 // goto endedGame;
                                 // s.changed = true;
-                                if (colorChange && (tolCheck(curcol,5,lsquare) || tolCheck(curcol,5,dsquare)))
+                                if (colorChange && (tolCheck(curcol, 5, lsquare) || tolCheck(curcol, 5, dsquare)))
                                 {
                                     s.cur_empty = true;
                                     goto EmpChng;
@@ -446,7 +423,7 @@ namespace WinFormsApp1
                                     moves++;
                                     castle.Add(s);
                                 }
-                                else if (tolCheck(curcol, 5, !colorChange?lsquare:lsquareghost) || tolCheck(curcol, 5, !colorChange?dsquare:dsquareghost))
+                                else if (tolCheck(curcol, 5, !colorChange ? lsquare : lsquareghost) || tolCheck(curcol, 5, !colorChange ? dsquare : dsquareghost))
                                 {
                                     start = s.name;
                                     s.cur_empty = true;
@@ -497,7 +474,7 @@ namespace WinFormsApp1
                         st = Game.ToAscii();
                         Console.WriteLine(st);
                         //Console.Read();
-                       
+
                         try { Game.Move(new Move(start, dest)); }
                         catch { goto endedGame; }
 
@@ -537,64 +514,15 @@ namespace WinFormsApp1
             }
         }
 
-        private void button3_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                square rand = board[lolxd.Next(board.Count)];
-                label1.Text = rand.name + ", " + (rand.color == 0 ? "White" : "Black");
-                squarebm = images[imnum].Clone(new RectangleF(new PointF(rand.topleft[0], rand.topleft[1]), new SizeF(rand.width, rand.height)), 0);
-                pictureBox2.Image = squarebm;
-            }
-            catch { }
-        }
+     
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            square s = board[comboBox1.SelectedIndex];
-            label2.Text = s.color == 0 ? "White" : "Black";
-            Bitmap b = images[imnum].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0);
-            pictureBox3.Image = b;
-            selbox.BackColor = PictureAnalysis.GetMostUsedColor(b);
+      
 
-        }
-        int imnum = 0;
-        private void button4_Click(object sender, EventArgs e)
-        {
-            if (!(imnum == images.Count - 1))
-            {
-                imnum++;
-                pictureBox1.Image = images[imnum];
+       
 
-            }
-        }
+      
 
-        private void button5_Click(object sender, EventArgs e)
-        {
-            if (!(imnum == 0))
-            {
-                imnum--;
-                pictureBox1.Image = images[imnum];
-
-            }
-        }
-        int timercount = 0;
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            try
-            {
-                whiteBox.BackColor = wte[timercount];
-                blackBox.BackColor = blk[timercount];
-                timercount++;
-                if (timercount >= wte.Count)
-                    timercount = 0;
-            }
-            catch
-            {
-
-            }
-
-        }
+     
 
         static bool tolCheck(Color c, int tol, List<Color> CompareList)
         {
@@ -680,27 +608,207 @@ namespace WinFormsApp1
 
 
         }
-        bool chk = false;
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
-        {
-            if (checkBox1.Checked)
-                chk = true;
-            else
-                chk = false;
-        }
+       
 
-        private void label3_Click(object sender, EventArgs e)
-        {
-
-        }
-
+        
+      
+        bool hex = false;
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBox2.Checked)
+            if (!colorChange)
+            {
                 colorChange = true;
+                colswit.Visible = true;
+                label3.Visible = true;
+                label4.Visible = true;
+               
+                if (hex)
+                {
+                    label2.Visible = true;
+                    label5.Visible = true;
+                    lhbox.Visible = true;
+                    dhbox.Visible = true;
+                    LSR.Visible = false;
+                    LSG.Visible = false;
+                    LSB.Visible = false;
+                    RSR.Visible = false;
+                    RSG.Visible = false;
+                    RSB.Visible = false;
+                }
+                else
+                {
+
+                    lhbox.Visible = false;
+                    dhbox.Visible = false;
+                    LSR.Visible = true;
+                    LSG.Visible = true;
+                    LSB.Visible = true;
+                    RSR.Visible = true;
+                    RSG.Visible = true;
+                    RSB.Visible = true;
+                    label2.Visible = false;
+                    label5.Visible = false;
+                }
+            }
             else
+            {
+                label3.Visible = false;
+                label4.Visible = false;
+                label2.Visible = false;
+                label5.Visible = false;
                 colorChange = false;
-            
+                colswit.Visible = false;
+                lhbox.Visible = false;
+                dhbox.Visible = false;
+                LSR.Visible = false;
+                LSG.Visible = false;
+                LSB.Visible = false;
+                RSR.Visible = false;
+                RSG.Visible = false;
+                RSB.Visible = false;
+            }
+        }
+
+    
+
+        private void colswit_Click(object sender, EventArgs e)
+        {
+            if (colorChange)
+                if (!hex)
+                {
+                    hex = true;
+                    lhbox.Visible = true;
+                    dhbox.Visible = true;
+                    LSR.Visible = false;
+                    LSG.Visible = false;
+                    LSB.Visible = false;
+                    RSR.Visible = false;
+                    RSG.Visible = false;
+                    RSB.Visible = false;
+                    colswit.Text = "HEX";
+                }
+                else
+                {
+                    hex = false;
+                    lhbox.Visible = !true;
+                    dhbox.Visible = !true;
+                    LSR.Visible = !false;
+                    LSG.Visible = !false;
+                    LSB.Visible = !false;
+                    RSR.Visible = !false;
+                    RSG.Visible = !false;
+                    RSB.Visible = !false;
+                    colswit.Text = "RGB";
+                }
+
+        }
+
+        private void lhbox_Leave(object sender, EventArgs e)
+        {
+
+            string lht = lhbox.Text; try
+            {
+                
+            string add = "";
+            while (lht.Length != 6)
+            {
+                lht += "0";
+                add += "0";
+            }
+            lhbox.Text += add;
+           
+                lr = Convert.ToInt32(lht[0] + "" + lht[1], 16);
+                lg = Convert.ToInt32(lht[2] + "" + lht[3], 16);
+                lb = Convert.ToInt32(lht[4] + "" + lht[5], 16);
+
+                if (lr < 0 || lr > 255 || lg < 0 || lg > 255 || lb < 0 || lb > 255)
+                {
+                    lhbox.Text = "FFFFFF";
+                    lht = lhbox.Text;
+                    lr = Convert.ToInt32(lht[0] + "" + lht[1], 16);
+                    lg = Convert.ToInt32(lht[2] + "" + lht[3], 16);
+                    lb = Convert.ToInt32(lht[4] + "" + lht[5], 16);
+                }
+            }
+            catch
+            {
+                lhbox.Text = "FFFFFF";
+                lht = lhbox.Text;
+                lr = Convert.ToInt32(lht[0] + "" + lht[1], 16);
+                lg = Convert.ToInt32(lht[2] + "" + lht[3], 16);
+                lb = Convert.ToInt32(lht[4] + "" + lht[5], 16);
+            }
+
+        }
+
+        private void dhbox_Leave(object sender, EventArgs e)
+        {
+            string dht = dhbox.Text; try
+            {
+               
+                string add = "";
+            while (dht.Length != 6)
+            {
+                dht += "0";
+                add += "0";
+            }
+            dhbox.Text += add;
+
+           
+                dr = Convert.ToInt32(dht[0] + "" + dht[1], 16);
+                dg = Convert.ToInt32(dht[2] + "" + dht[3], 16);
+                db = Convert.ToInt32(dht[4] + "" + dht[5], 16);
+
+                if (lr < 0 || lr > 255 || lg < 0 || lg > 255 || lb < 0 || lb > 255)
+                {
+                    dhbox.Text = "FFFFFF";
+                    dht = lhbox.Text;
+                    dr = Convert.ToInt32(dht[0] + "" + dht[1], 16);
+                    dg = Convert.ToInt32(dht[2] + "" + dht[3], 16);
+                    db = Convert.ToInt32(dht[4] + "" + dht[5], 16);
+                }
+            }
+            catch
+            {
+                dhbox.Text = "FFFFFF";
+                dht = lhbox.Text;
+                dr = Convert.ToInt32(dht[0] + "" + dht[1], 16);
+                dg = Convert.ToInt32(dht[2] + "" + dht[3], 16);
+                db = Convert.ToInt32(dht[4] + "" + dht[5], 16);
+            }
+
+        }
+
+        private void LSR_ValueChanged(object sender, EventArgs e)
+        {
+            LSR.Value = (int)LSR.Value;
+        }
+
+        private void LSG_ValueChanged(object sender, EventArgs e)
+        {
+            LSG.Value = (int)LSG.Value;
+        }
+
+        private void LSB_ValueChanged(object sender, EventArgs e)
+        {
+            LSB.Value = (int)LSB.Value;
+        }
+
+        private void RSR_ValueChanged(object sender, EventArgs e)
+        {
+            RSR.Value = (int)RSR.Value;
+        }
+
+        private void RSG_ValueChanged(object sender, EventArgs e)
+        {
+            RSG.Value = (int)RSG.Value;
+
+        }
+
+        private void RSB_ValueChanged(object sender, EventArgs e)
+        {
+            RSB.Value = (int)RSB.Value;
+
         }
     }
 }
