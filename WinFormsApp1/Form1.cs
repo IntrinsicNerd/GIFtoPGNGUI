@@ -267,26 +267,7 @@ namespace WinFormsApp1
                     images = new List<Bitmap>();
                     AnimatedGif gif = new AnimatedGif(fl, images);
 
-                    foreach (square s in board)
-                    {
-                        if (s.name == "e1")
-                        {
-
-                            wte = PictureAnalysis.GetMostUsedColorList(images[0].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0), 3);
-                        }
-                        if (s.name == "e8")
-                        {
-                            blk = PictureAnalysis.GetMostUsedColorList(images[0].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0), 3);
-                        }
-                        if (s.name == "e5")
-                        {
-                            dsquare = PictureAnalysis.GetMostUsedColor(images[0].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0));
-                        }
-                        if (s.name == "d5")
-                        {
-                            lsquare = PictureAnalysis.GetMostUsedColor(images[0].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0));
-                        }
-                    }
+                   
 
 
 
@@ -319,6 +300,27 @@ namespace WinFormsApp1
 
                     if (t1)
                     {
+
+                        foreach (square s in board)
+                        {
+                            if (s.name == "e1")
+                            {
+
+                               // wte = PictureAnalysis.GetMostUsedColorList(images[0].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0), 3);
+                            }
+                            if (s.name == "e8")
+                            {
+                               // blk = PictureAnalysis.GetMostUsedColorList(images[0].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0), 3);
+                            }
+                            if (s.name == "e5")
+                            {
+                                dsquare = PictureAnalysis.GetMostUsedColor(images[0].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0));
+                            }
+                            if (s.name == "d5")
+                            {
+                                lsquare = PictureAnalysis.GetMostUsedColor(images[0].Clone(new RectangleF(new PointF(s.topleft[0], s.topleft[1]), new SizeF(s.width, s.height)), 0));
+                            }
+                        }
                         //here will be more complex code comparing for turn one specific stuff
                         foreach (square s in board)
                         {
@@ -375,11 +377,16 @@ namespace WinFormsApp1
 
                                 }
                             }
+                            else
+                            {
+                                goto Still1;
+                            }
 
 
                         }
                     EndT1:
                         t1 = false;
+                 
                     }
 
                     //run code to see what move was made and add it to the pgn
@@ -505,6 +512,8 @@ namespace WinFormsApp1
                     richTextBox1.Text = Game.ToAscii();
 
                     num++;
+                Still1:
+                    Console.Write("");
                 }
             endedGame:
                 pgn = Game.ToPgn();
