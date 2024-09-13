@@ -310,6 +310,8 @@ namespace WinFormsApp1
 
                 foreach (Bitmap b in ims)
                 {
+                    if (Game.Moves().Length == 0)
+                        goto endedGame;
                     string start = "";
                     string dest = "";
                     count++;
@@ -401,7 +403,7 @@ namespace WinFormsApp1
 
                             Color curcol = PictureAnalysis.GetMostUsedColor(cur);
                             Color prevcol = PictureAnalysis.GetMostUsedColor(prev);
-                            if ((s.name == "e5" || s.name == "d6") && count == 5)
+                            if ((s.name == "e9" || s.name == "a9")||count == 19)
                             {
                                 st = Game.ToAscii();
                             }
@@ -423,7 +425,7 @@ namespace WinFormsApp1
                                     moves++;
                                     castle.Add(s);
                                 }
-                                else if (tolCheck(curcol, 5, !colorChange ? lsquare : lsquareghost) || tolCheck(curcol, 5, !colorChange ? dsquare : dsquareghost))
+                                else if (tolCheck(curcol, 7, !colorChange ? lsquare : lsquareghost) || tolCheck(curcol, 7, !colorChange ? dsquare : dsquareghost))
                                 {
                                     start = s.name;
                                     s.cur_empty = true;
@@ -432,7 +434,39 @@ namespace WinFormsApp1
                                 {
                                     dest = s.name;
                                 }
-                                if (starts == 2)
+                               
+                                 if (moves == 2)
+                                {
+                                    foreach (square sss in castle)
+                                    {
+                                        if (sss.file == 'g')
+                                        {
+                                            try
+                                            {
+                                                Game.Move("O-O");
+                                                goto Done;
+                                            }
+                                            catch
+                                           {
+                                                goto endedGame;
+                                           }
+                                        }
+                                        if (sss.file == 'c')
+                                        {
+                                            try
+                                            {
+                                                Game.Move("O-O-O");
+                                                goto Done;
+                                            }
+                                            catch
+                                            {
+                                                goto endedGame;
+                                            }
+                                        }
+                                    }
+
+                                }
+                                else if (starts == 2)
                                 {
                                     if (castle.Count == 1)
                                     {
@@ -450,23 +484,6 @@ namespace WinFormsApp1
                                     }
 
                                 }
-                                else if (moves == 2)
-                                {
-                                    foreach (square sss in castle)
-                                    {
-                                        if (sss.file == 'g')
-                                        {
-                                            Game.Move("O-O");
-                                            goto Done;
-                                        }
-                                        if (sss.file == 'c')
-                                        {
-                                            Game.Move("O-O-O");
-                                            goto Done;
-                                        }
-                                    }
-
-                                }
                             }
                         EmpChng:
                             Console.WriteLine();
@@ -475,7 +492,9 @@ namespace WinFormsApp1
                         Console.WriteLine(st);
                         //Console.Read();
 
-                        try { Game.Move(new Move(start, dest)); }
+                        try { Game.Move(new Move(start, dest));
+                           
+                                    }
                         catch { goto endedGame; }
 
                     Done:
@@ -488,6 +507,7 @@ namespace WinFormsApp1
                     num++;
                 }
             endedGame:
+                pgn = Game.ToPgn();
                 Console.WriteLine();
                 richTextBox1.Text = pgn;
 
