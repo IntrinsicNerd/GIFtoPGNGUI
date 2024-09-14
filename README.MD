@@ -1,4 +1,4 @@
-Gif to PGN Converter
+# Gif to PGN Converter
 
 This program converts GIF files of chess games into PGN notation.
 
